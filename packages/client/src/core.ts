@@ -115,6 +115,10 @@ export class PrismaAppSync {
                 typeof options?.maxReqPerUserMinute !== 'undefined'
                     ? options.maxReqPerUserMinute
                     : 200,
+            unsecureGraphQLErrors:
+                typeof options?.unsecureGraphQLErrors !== 'undefined'
+                    ? options.unsecureGraphQLErrors
+                    : false,
         }
 
         this.options.modelsMapping = {}
@@ -152,6 +156,9 @@ export class PrismaAppSync {
 
         // Set ENV variable for log level
         process.env.PRISMA_APPSYNC_LOG_LEVEL = this.options.logLevel
+
+        // Set ENV variable for unsecure GraphQL errors
+        process.env.PRISMA_APPSYNC_UNSECURE_GRAPHQL_ERRORS = this.options.unsecureGraphQLErrors.toString()
 
         // Debug logs
         // eslint-disable-next-line @typescript-eslint/no-unused-vars

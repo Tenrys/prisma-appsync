@@ -36,13 +36,16 @@ export class CustomError extends Error {
         this.cause = extensions?.cause?.meta?.cause || extensions?.cause
         this.code = typeof errorCodes[this.type] !== 'undefined' ? errorCodes[this.type] : errorCodes.INTERNAL_SERVER_ERROR
 
+        const unsecure = process.env.PRISMA_APPSYNC_UNSECURE_GRAPHQL_ERRORS === 'true'
+
         this.message = JSON.stringify({
             error: this.error,
             type: this.type,
             code: this.code,
+            ...(unsecure && this.cause && { cause: this.cause.message }),
         })
 
-        const maxCauseMessageLength = 500
+        const maxCauseMessageLength = process.env.PRISMA_APPSYNC_UNSECURE_GRAPHQL_ERRORS ? Infinity : 500
 
         if (this.cause?.message?.length > maxCauseMessageLength)
             this.cause.message = `... ${this.cause.message.slice(this.cause.message.length - maxCauseMessageLength)}`

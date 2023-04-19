@@ -21,6 +21,7 @@ export interface PrismaAppSyncOptionsType {
     defaultPagination?: number | false
     maxDepth?: number
     maxReqPerUserMinute?: number | false
+    unsecureGraphQLErrors?: boolean
 }
 
 export type Options = Required<PrismaAppSyncOptionsType> & {
