@@ -155,11 +155,15 @@ export async function createServer({ defaultQuery, lambdaHandler, port, schema, 
                             handlerResults.forEach((handlerResult, eventIndex) => {
                                 if (handlerResult.status === 'rejected') {
                                     const error = handlerResult.reason
+                                    const unsecure = process.env.PRISMA_APPSYNC_UNSECURE_GRAPHQL_ERRORS === 'true'
 
                                     throw new GraphQLError(String(error?.error || error?.message || error), {
                                         ...(error?.type && {
                                             extensions: {
                                                 code: error.type,
+                                                ...(unsecure && {
+                                                    cause: error.cause.message,
+                                                }),
                                                 ...(error?.code && {
                                                     http: {
                                                         status: error.code,
