@@ -8,7 +8,7 @@
                     orderBy: {{ field.relation.type }}OrderByInput
                     take: Int
                     skip: Int
-                ): {% if field.isList -%}[{{ field.scalar }}]{% else %}{{ field.scalar }}{% endif %}{% if field.isRequired -%}!{% endif %} {{ field.directives.field | safe }}
+                ): {% if field.isList -%}[{{ field.scalar }}!]{% else %}{{ field.scalar }}{% endif %}{% if field.isRequired -%}!{% endif %} {{ field.directives.field | safe }}
             {% else -%}
                 {{ field.name }}: {% if field.isList -%}[{{ field.scalar }}!]{% else %}{{ field.scalar }}{% endif %}{% if field.isRequired -%}!{% endif %} {{ field.directives.field | safe }}
             {% endif -%}
