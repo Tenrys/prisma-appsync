@@ -43,7 +43,8 @@ export default function useLambdaEvents({
             .filter(selection => selection !== '.')
             .map(selection => selection.replace(/\./g, '/'))
 
-        selectionSetList.unshift('__typename')
+        if (!selectionSet.__typename)
+            selectionSetList.unshift('__typename')
 
         const event: AppSyncEvent = {
             arguments: args,

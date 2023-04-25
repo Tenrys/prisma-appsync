@@ -13,6 +13,8 @@ export async function addTypename(
 
             let fields = schema.getQueryType()?.getFields()?.[pathsWithoutArrays?.[0]]
 
+            console.log(pathsWithoutArrays)
+
             for (let index = 1; index < pathsWithoutArrays.length - 1; index++) {
                 if (fields?.type.constructor.name === GraphQLObjectType.name)
                     fields = (fields?.type as GraphQLObjectType)?.getFields()?.[pathsWithoutArrays[index]]
