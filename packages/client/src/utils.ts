@@ -3,6 +3,7 @@ import { isMatch } from 'micromatch'
 import deepmerge from 'deepmerge'
 import { decode as decodeHtml, encode as encodeHtml } from 'html-entities'
 import xss from 'xss'
+import type { PrismaArgs } from './defs'
 
 /**
  * #### Deep merge objects (without mutating the target object).
@@ -407,4 +408,42 @@ export function replaceAll(str: string, findArray: string[], replaceArray: strin
  */
 export function unique(array: Iterable<any> | null | undefined): any[] {
     return [...new Set(array)]
+}
+
+export function stripAliases(prismaArgs: PrismaArgs) {
+    for (const [, value] of Object.entries(prismaArgs)) {
+        if (isObject(value)) {
+            if (value.__alias) {
+                // delete prismaArgs[key]
+                // prismaArgs[value.__alias] = value
+                delete value.__alias
+            }
+
+            stripAliases(value)
+        }
+    }
+
+    return prismaArgs
+}
+
+export function aliasResults(prismaArgs: PrismaArgs, result: any) {
+    for (const operation of ['select', 'include']) {
+        if (!prismaArgs[operation])
+            continue
+
+        for (const [key, value] of Object.entries(prismaArgs[operation]) as [string, PrismaArgs][]) {
+            let field = key
+            if (isObject(value)) {
+                if (value.__alias) {
+                    result[value.__alias] = result[key]
+                    delete result[key]
+                    field = value.__alias
+                }
+            }
+            if (isObject(result[field]))
+                result = aliasResults(value, result[field])
+        }
+    }
+
+    return result
 }

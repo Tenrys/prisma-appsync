@@ -22,7 +22,7 @@ import {
     runHooks,
 } from './guard'
 import { parseEvent } from './adapter'
-import { isEmpty, omit } from './utils'
+import { aliasResults, clone, isEmpty, omit, stripAliases } from './utils'
 import { prismaQueryJoin } from './resolver'
 import * as queries from './resolver'
 
@@ -356,25 +356,29 @@ export class PrismaAppSync {
                 })
             }
 
+            const QueryParamsNoAlias = {
+                ...QueryParams,
+                prismaArgs: stripAliases(clone(QueryParams.prismaArgs)),
+            }
             // Resolver :: resolve query for UNIT TESTS
             if (process?.env?.PRISMA_APPSYNC_TESTING === 'true') {
                 log('Resolving query for UNIT TESTS.')
 
                 const isBatchAction = BatchActionsList.includes(
-                    QueryParams?.context?.action,
+                    QueryParamsNoAlias?.context?.action,
                 )
 
                 const getTestResult = () => {
                     return {
-                        ...QueryParams.fields.reduce((a, v) => {
-                            const value = !isEmpty(QueryParams?.prismaArgs?.data?.[v])
-                                ? QueryParams.prismaArgs.data[v]
+                        ...QueryParamsNoAlias.fields.reduce((a, v) => {
+                            const value = !isEmpty(QueryParamsNoAlias?.prismaArgs?.data?.[v])
+                                ? QueryParamsNoAlias.prismaArgs.data[v]
                                 : (Math.random() + 1).toString(36).substring(7)
 
                             return { ...a, [v]: String(value) }
                         }, {}),
                         [DebugTestingKey]: {
-                            QueryParams,
+                            QueryParamsNoAlias,
                         },
                     }
                 }
@@ -387,35 +391,35 @@ export class PrismaAppSync {
             // Resolver :: query is disabled
             else if (
                 resolveParams?.resolvers
-                && typeof resolveParams.resolvers[QueryParams.operation] === 'boolean'
-                && resolveParams.resolvers[QueryParams.operation] === false
+                && typeof resolveParams.resolvers[QueryParamsNoAlias.operation] === 'boolean'
+                && resolveParams.resolvers[QueryParamsNoAlias.operation] === false
             ) {
                 throw new CustomError(
-                    `Query resolver for ${QueryParams.operation} is disabled.`,
+                    `Query resolver for ${QueryParamsNoAlias.operation} is disabled.`,
                     { type: 'FORBIDDEN' },
                 )
             }
             // Resolver :: resolve query with Custom Resolver
             else if (
-                typeof resolveParams?.resolvers?.[QueryParams.operation] === 'function'
+                typeof resolveParams?.resolvers?.[QueryParamsNoAlias.operation] === 'function'
             ) {
-                log(`Resolving query for Custom Resolver "${QueryParams.operation}".`)
+                log(`Resolving query for Custom Resolver "${QueryParamsNoAlias.operation}".`)
                 const customResolverFn = resolveParams.resolvers[
-                    QueryParams.operation
+                    QueryParamsNoAlias.operation
                 ] as Function
                 result = await customResolverFn({
-                    ...QueryParams,
+                    ...QueryParamsNoAlias,
                     prismaClient: this.prismaClient,
                 })
             }
             // Resolver :: resolve query with built-in CRUD
-            else if (!isEmpty(QueryParams?.context?.model)) {
-                log(`Resolving query for built-in CRUD operation "${QueryParams.operation}".`)
+            else if (!isEmpty(QueryParamsNoAlias?.context?.model)) {
+                log(`Resolving query for built-in CRUD operation "${QueryParamsNoAlias.operation}".`)
 
                 try {
-                    result = await queries[`${QueryParams.context.action}Query`](
+                    result = await queries[`${QueryParamsNoAlias.context.action}Query`](
                         this.prismaClient,
-                        QueryParams,
+                        QueryParamsNoAlias,
                     )
                 }
                 catch (err: any) {
@@ -460,12 +464,14 @@ export class PrismaAppSync {
             // Resolver :: query resolver not found
             else {
                 throw new CustomError(
-                    `Query resolver for ${QueryParams.operation} could not be found.`,
+                    `Query resolver for ${QueryParamsNoAlias.operation} could not be found.`,
                     {
                         type: 'INTERNAL_SERVER_ERROR',
                     },
                 )
             }
+
+            result = aliasResults(QueryParams.prismaArgs, result)
 
             // Guard: get and run all after hooks functions matching query
             if (!isEmpty(resolveParams?.hooks)) {

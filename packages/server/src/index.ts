@@ -15,7 +15,6 @@ import { Authorizations } from '../../client/src'
 import { queryObject } from './utils/useGraphqlFilter'
 import useLambdaIdentity from './utils/useLambdaIdentity'
 import useLambdaEvents from './utils/useLambdaEvents'
-import { addTypename } from './utils/useGraphqlTypename'
 
 declare global {
     // eslint-disable-next-line no-var, vars-on-top
@@ -184,17 +183,13 @@ export async function createServer({ defaultQuery, lambdaHandler, port, schema, 
                             const queryDocument = gql`${events[0].info.selectionSetGraphQL}`
 
                             const filteredResults = queryObject(
+                                yogaSchema,
                                 queryDocument,
                                 lambdaResults,
                                 { includeMissingData: true },
                             )
 
-                            const typedResults = await addTypename(
-                                yogaSchema,
-                                filteredResults,
-                            )
-
-                            setResult({ data: typedResults })
+                            setResult({ data: filteredResults })
                         }
                     },
                 }

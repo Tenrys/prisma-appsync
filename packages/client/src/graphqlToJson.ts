@@ -1,6 +1,7 @@
 // adapted from: https://github.com/trayio/graphql-query-to-json
 import type { FragmentDefinitionNode } from 'graphql'
 import { parse } from 'graphql'
+import { merge } from 'lodash'
 import mapValues from 'lodash/mapValues'
 
 interface variablesObject {
@@ -125,7 +126,7 @@ function getSelections(selections: Selection[], fragments: FragmentDefinitionNod
         const fragment = fragments
             .find(def => def.name.value === selection.name.value)
         if (fragment) {
-            Object.assign(selObj, getSelections(fragment.selectionSet.selections as Selection[], fragments))
+            merge(selObj, getSelections(fragment.selectionSet.selections as Selection[], fragments))
             return
         }
 

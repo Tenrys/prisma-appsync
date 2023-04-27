@@ -228,6 +228,7 @@ export interface PrismaArgs {
     skip?: number | undefined
     take?: number | undefined
     skipDuplicates?: boolean | undefined
+    __alias?: string
 }
 
 export type PrismaOperator = keyof Required<PrismaArgs>

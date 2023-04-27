@@ -448,7 +448,10 @@ export async function getPrismaArgs({
     return prismaArgs
 }
 
-async function jsonToPrismaArgs({ select, include = {} }: ({ select: any; include?: any }), _sanitize: boolean) {
+async function jsonToPrismaArgs(
+    { select, include = {} }: ({ select: any; include?: any }),
+    _sanitize: boolean,
+): Promise<{ select: any; include?: any; __alias?: string }> {
     select = { ...select }
 
     for (const [key, value] of Object.entries(select) as [string, any][]) {
@@ -467,25 +470,39 @@ async function jsonToPrismaArgs({ select, include = {} }: ({ select: any; includ
                 sanitizedArgs.orderBy = parseOrderBy(sanitizedArgs.orderBy)
 
             const prismaArgs = await jsonToPrismaArgs({ select: valueWithoutArgs }, _sanitize)
+
+            let name: string
+            if (prismaArgs.select.__aliasFor) {
+                const actualName = prismaArgs.select.__aliasFor
+                const alias = key
+
+                name = actualName
+                prismaArgs.__alias = alias
+
+                delete prismaArgs.select.__aliasFor
+                delete select[alias]
+            }
+            else { name = key }
+
             if (!isEmpty(prismaArgs.select) || !isEmpty(prismaArgs.include)) {
-                select[key] = {
+                select[name] = {
                     ...prismaArgs,
                     ...sanitizedArgs,
                 }
             }
             else {
-                delete select[key]
+                delete select[name]
                 if (!isEmpty(sanitizedArgs))
-                    include[key] = { ...sanitizedArgs }
+                    include[name] = { ...sanitizedArgs }
                 else
-                    include[key] = true
+                    include[name] = true
             }
         }
     }
     if (isEmpty(include))
         include = undefined
 
-    return { select, include }
+    return { select, ...(include ? { include } : {}) }
 }
 
 /**
