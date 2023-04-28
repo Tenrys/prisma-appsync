@@ -1,5 +1,5 @@
 // adapted from: https://github.com/trayio/graphql-query-to-json
-import type { FragmentDefinitionNode } from 'graphql'
+import type { FragmentDefinitionNode, InlineFragmentNode } from 'graphql'
 import { parse } from 'graphql'
 import { merge } from 'lodash'
 import mapValues from 'lodash/mapValues'
@@ -123,8 +123,15 @@ function getSelections(selections: Selection[], fragments: FragmentDefinitionNod
     const selObj: any = {}
 
     selections.forEach((selection) => {
+        if (selection.kind === 'InlineFragment') {
+            merge(selObj, getSelections((selection as InlineFragmentNode).selectionSet.selections as Selection[], fragments))
+            return
+        }
+
         const fragment = fragments
-            .find(def => def.name.value === selection.name.value)
+            .find((def) => {
+                return def.name.value === selection?.name?.value
+            })
         if (fragment) {
             merge(selObj, getSelections(fragment.selectionSet.selections as Selection[], fragments))
             return
