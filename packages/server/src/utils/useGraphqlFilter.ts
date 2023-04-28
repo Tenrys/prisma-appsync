@@ -93,7 +93,7 @@ const reduceObject = <T extends JSONObject>(
 
             if (typeof value !== 'undefined' && value !== null && value !== '') {
                 if (selection.selectionSet) {
-                    reducedObject[fieldName] = reduceOutput(
+                    const field = reduceOutput(
                         schema,
                         selection.selectionSet,
                         fragments,
@@ -101,6 +101,10 @@ const reduceObject = <T extends JSONObject>(
                         localPaths,
                         options,
                     )
+                    if (isObject(field))
+                        reducedObject[fieldName] = merge(reducedObject[fieldName], field)
+                    else if (Array.isArray(field))
+                        reducedObject[fieldName] = (field as any[]).map((item, i) => merge(reducedObject?.[fieldName]?.[i], item))
                 }
                 else {
                     reducedObject[fieldName] = value

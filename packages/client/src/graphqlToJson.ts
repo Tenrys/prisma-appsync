@@ -134,7 +134,7 @@ function getSelections(selections: Selection[], fragments: FragmentDefinitionNod
         const selectionName = selectionHasAlias ? selection.alias.value : selection.name.value
 
         if (selection.selectionSet) {
-            selObj[selectionName] = getSelections(selection.selectionSet.selections, fragments)
+            selObj[selectionName] = merge(selObj[selectionName] || {}, getSelections(selection.selectionSet.selections, fragments))
 
             if (selectionHasAlias)
                 selObj[selection.alias.value].__aliasFor = selection.name.value
