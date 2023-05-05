@@ -441,7 +441,7 @@ export function aliasResults(prismaArgs: PrismaArgs, result: any) {
                 }
             }
             if (isObject(result[field]))
-                result = aliasResults(value, result[field])
+                result[field] = aliasResults(value, result[field])
         }
     }
 
