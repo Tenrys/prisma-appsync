@@ -471,7 +471,9 @@ export class PrismaAppSync {
                 )
             }
 
+            // console.log('PRE ALIAS', result)
             result = aliasResults(QueryParams.prismaArgs, result)
+            // console.log('POST ALIAS', result)
 
             // Guard: get and run all after hooks functions matching query
             if (!isEmpty(resolveParams?.hooks)) {

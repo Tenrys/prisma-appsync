@@ -427,6 +427,9 @@ export function stripAliases(prismaArgs: PrismaArgs) {
 }
 
 export function aliasResults(prismaArgs: PrismaArgs, result: any) {
+    if (isEmpty(result))
+        return
+
     for (const operation of ['select', 'include']) {
         if (!prismaArgs[operation])
             continue
