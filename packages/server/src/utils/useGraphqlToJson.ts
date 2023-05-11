@@ -1,5 +1,5 @@
 // adapted from: https://github.com/trayio/graphql-query-to-json
-import type { FragmentDefinitionNode, InlineFragmentNode } from 'graphql'
+import type { FragmentDefinitionNode, InlineFragmentNode, OperationDefinitionNode } from 'graphql'
 import { parse } from 'graphql'
 import { merge } from 'lodash'
 import mapValues from 'lodash/mapValues'
@@ -231,9 +231,12 @@ export function graphQlQueryToJson(
     const parsedQuery = parse(query)
     // console.dir({ parsedQuery }, { depth: 4 })
 
-    const operationDefinition = parsedQuery.definitions.find((q: any) => {
-        return options.operationName === q?.name?.value
-    }) || parsedQuery.definitions?.[0]
+    const operationDefinitions = parsedQuery.definitions.filter((def): def is OperationDefinitionNode => def.kind === 'OperationDefinition')
+    const fragmentDefinitions = parsedQuery.definitions.filter((def): def is FragmentDefinitionNode => def.kind === 'FragmentDefinition')
+
+    const operationDefinition = operationDefinitions.find((def) => {
+        return options.operationName === def?.name?.value
+    }) || operationDefinitions?.[0]
 
     // @ts-expect-error: Type 'InputObjectTypeExtensionNode' is missing the following properties from type 'ActualDefinitionNode': operation, selectionSet
     const definition = operationDefinition as ActualDefinitionNode
@@ -241,9 +244,7 @@ export function graphQlQueryToJson(
 
     checkEachVariableInQueryIsDefined(definition, options.variables)
 
-    const fragments = parsedQuery.definitions
-        .filter((def): def is FragmentDefinitionNode => def.kind === 'FragmentDefinition')
-    const selections = getSelections(definition.selectionSet.selections, fragments)
+    const selections = getSelections(definition.selectionSet.selections, fragmentDefinitions)
     jsonObject[operation] = selections
 
     const varsReplacedWithValues = replaceVariables(jsonObject, options.variables)

@@ -160,7 +160,7 @@ export async function createServer({ defaultQuery, lambdaHandler, port, schema, 
                                         ...(error?.type && {
                                             extensions: {
                                                 code: error.type,
-                                                ...(unsecure && {
+                                                ...((unsecure && error?.cause?.message) && {
                                                     cause: error.cause.message,
                                                 }),
                                                 ...(error?.code && {
