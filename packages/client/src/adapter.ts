@@ -370,6 +370,7 @@ export function getType({ _parentTypeName }: { _parentTypeName: string }): Graph
     return type as GraphQLType
 }
 
+const isNone = value => value === null || value === undefined
 /**
  * #### Returns Prisma args (`where`, `data`, `orderBy`, ...).
  *
@@ -393,40 +394,40 @@ export function getPrismaArgs({
 }): PrismaArgs {
     const prismaArgs: PrismaArgs = {}
 
-    if (typeof _arguments.data !== 'undefined' && typeof _arguments.operation !== 'undefined') {
+    if (!isNone(_arguments.data) && !isNone(_arguments.operation)) {
         throw new CustomError('Using \'data\' and \'operation\' together is not possible.', {
             type: 'BAD_USER_INPUT',
         })
     }
 
-    if (typeof _arguments.data !== 'undefined')
+    if (!isNone(_arguments.data))
         prismaArgs.data = _arguments.data
-    else if (typeof _arguments.operation !== 'undefined')
+    else if (!isNone(_arguments.operation))
         prismaArgs.data = _arguments.operation
 
-    if (typeof _arguments.create !== 'undefined')
+    if (!isNone(_arguments.create))
         prismaArgs.create = _arguments.create
-    if (typeof _arguments.update !== 'undefined')
+    if (!isNone(_arguments.update))
         prismaArgs.update = _arguments.update
-    if (typeof _arguments.where !== 'undefined')
+    if (!isNone(_arguments.where))
         prismaArgs.where = _arguments.where
-    if (typeof _arguments.orderBy !== 'undefined')
+    if (!isNone(_arguments.orderBy))
         prismaArgs.orderBy = parseOrderBy(_arguments.orderBy)
-    if (typeof _arguments.skipDuplicates !== 'undefined')
+    if (!isNone(_arguments.skipDuplicates))
         prismaArgs.skipDuplicates = _arguments.skipDuplicates
 
-    if (typeof _selectionSetList !== 'undefined')
+    if (!isNone(_selectionSetList))
         prismaArgs.select = parseSelectionList(_selectionSetList)
 
     if (isEmpty(prismaArgs.select))
         delete prismaArgs.select
 
-    if (typeof _arguments.skip !== 'undefined')
+    if (!isNone(_arguments.skip))
         prismaArgs.skip = parseInt(_arguments.skip)
     else if (defaultPagination !== false && action === Actions.list)
         prismaArgs.skip = 0
 
-    if (typeof _arguments.take !== 'undefined')
+    if (!isNone(_arguments.take))
         prismaArgs.take = parseInt(_arguments.take)
     else if (defaultPagination !== false && action === Actions.list)
         prismaArgs.take = defaultPagination
