@@ -49,6 +49,11 @@ This project follows the [all-contributors](https://allcontributors.org/) specif
       <td align="center" valign="top" width="14.28%"><a href="https://www.cameronjjenkinson.com"><img src="https://avatars.githubusercontent.com/u/5429478?v=4?s=100" width="100px;" alt="Cameron Jenkinson"/><br /><sub><b>Cameron Jenkinson</b></sub></a><br /><a href="https://github.com/maoosi/prisma-appsync/commits?author=cjjenkinson" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/jeremy-white"><img src="https://avatars.githubusercontent.com/u/42325631?v=4?s=100" width="100px;" alt="jeremy-white"/><br /><sub><b>jeremy-white</b></sub></a><br /><a href="https://github.com/maoosi/prisma-appsync/commits?author=jeremy-white" title="Code">💻</a></td>
     </tr>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/max-konin"><img src="https://avatars.githubusercontent.com/u/1570356?v=4?s=100" width="100px;" alt="Max Konin"/><br /><sub><b>Max Konin</b></sub></a><br /><a href="https://github.com/maoosi/prisma-appsync/commits?author=max-konin" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/michachan"><img src="https://avatars.githubusercontent.com/u/27760344?v=4?s=100" width="100px;" alt="Michael Chan"/><br /><sub><b>Michael Chan</b></sub></a><br /><a href="https://github.com/maoosi/prisma-appsync/commits?author=michachan" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://www.linkedin.com/in/nhu-mai/"><img src="https://avatars.githubusercontent.com/u/84061316?v=4?s=100" width="100px;" alt="Nhu Mai"/><br /><sub><b>Nhu Mai</b></sub></a><br /><a href="https://github.com/maoosi/prisma-appsync/commits?author=nhu-mai-101" title="Code">💻</a></td>
+    </tr>
   </tbody>
 </table>
 
@@ -68,13 +73,7 @@ Thanks go to these wonderful sponsors!
         <td align="center" style="width:300px;">
             <a href="https://kuizto.co" rel="noopener" target="_blank">
                 <img src="https://prisma-appsync.vercel.app/sponsors/kuizto-logo.jpg" width="120px;" alt="Go to kuizto.co"/>
-                <br /><sub><b>Solve and sparkle up your daily food life</b></sub>
-            </a>
-        </td>
-        <td align="center" style="width:300px;">
-            <a href="https://travistravis.co" rel="noopener" target="_blank">
-                <img src="https://prisma-appsync.vercel.app/sponsors/travistravis-logo.jpg" width="120px;" alt="Go to travistravis.co"/>
-                <br /><sub><b>Collaborative travel planning</b></sub>
+                <br /><sub><b>Reconnect with home cooking</b></sub>
             </a>
         </td>
     </tr>

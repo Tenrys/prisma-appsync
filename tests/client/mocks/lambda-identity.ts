@@ -6,12 +6,12 @@ import type {
     Authorization,
     Identity,
     OPENID_CONNECT,
-} from '../../../client/src'
+} from '../../../packages/client/src'
 import {
     Authorizations,
-} from '../../../client/src'
+} from '../../../packages/client/src'
 
-export default function useLambdaIdentity(identity: Authorization, opts?: mockOptions): Identity {
+export default function mockLambdaIdentity(identity: Authorization, opts?: mockOptions): Identity {
     if (identity === Authorizations.AWS_IAM) {
         const mock: AWS_IAM = {
             accountId: 'string',
@@ -26,11 +26,12 @@ export default function useLambdaIdentity(identity: Authorization, opts?: mockOp
         return mock
     }
     else if (identity === Authorizations.AMAZON_COGNITO_USER_POOLS) {
+        const decodedJWTToken = opts?.jwt ? JSON.parse(Buffer.from(opts?.jwt?.split('.')[1], 'base64').toString()) : {}
         const mock: AMAZON_COGNITO_USER_POOLS = {
-            sub: opts?.sub || 'undefined',
+            sub: decodedJWTToken?.sub || 'undefined',
             issuer: 'string',
-            username: opts?.username || 'undefined',
-            claims: {},
+            username: decodedJWTToken?.['cognito:username'] || 'undefined',
+            claims: decodedJWTToken,
             sourceIp: [opts?.sourceIp || 'undefined'],
             defaultAuthStrategy: 'string',
             groups: ['admin', 'member'],
@@ -65,9 +66,10 @@ export default function useLambdaIdentity(identity: Authorization, opts?: mockOp
     }
 }
 
-interface mockOptions {
+type mockOptions = {
     sub: string
     username: string
     sourceIp: string
     resolverContext: any
+    jwt?: string
 }

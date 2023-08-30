@@ -83,8 +83,36 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "max-konin",
+      "name": "Max Konin",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1570356?v=4",
+      "profile": "https://github.com/max-konin",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "michachan",
+      "name": "Michael Chan",
+      "avatar_url": "https://avatars.githubusercontent.com/u/27760344?v=4",
+      "profile": "https://github.com/michachan",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "nhu-mai-101",
+      "name": "Nhu Mai",
+      "avatar_url": "https://avatars.githubusercontent.com/u/84061316?v=4",
+      "profile": "https://www.linkedin.com/in/nhu-mai/",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "commitConvention": "angular",
-  "contributorsPerLine": 7
+  "contributorsPerLine": 7,
+  "commitType": "docs"
 }

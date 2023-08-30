@@ -41,13 +41,19 @@ export class Installer {
     }
 
     constructor() {
-        // defaults
-        this.gitBranch = ['preview', 'contributor'].includes(String(process.env?.INSTALL_MODE))
-            ? 'maoosi/prisma-appsync#dev'
-            : 'maoosi/prisma-appsync#latest'
-        this.installPackage = ['preview', 'contributor'].includes(String(process.env?.INSTALL_MODE))
-            ? 'prisma-appsync@preview'
-            : 'prisma-appsync'
+        this.gitBranch = 'maoosi/prisma-appsync#main'
+        this.installPackage = 'prisma-appsync'
+
+        if (String(process.env?.COMPILE_MODE) === 'preview') {
+            this.gitBranch = 'maoosi/prisma-appsync#dev'
+            this.installPackage = 'prisma-appsync@preview'
+        }
+
+        if (['preview', 'contributor'].includes(String(process.env?.INSTALL_MODE))) {
+            this.gitBranch = 'maoosi/prisma-appsync#dev'
+            this.installPackage = 'prisma-appsync@preview'
+        }
+
         this.cwd = process.cwd()
         this.timestamp = new Date().getTime()
         this.isContributorMode = String(process.env?.INSTALL_MODE) === 'contributor'
@@ -310,6 +316,8 @@ export class Installer {
                 ...this.installConfig.dependencies,
                 ...[
                     { package: '@types/node', dev: true },
+                    { package: 'js-yaml', dev: true },
+                    { package: 'amplify-appsync-simulator', dev: true },
                 ],
             ]
 
@@ -326,10 +334,15 @@ export class Installer {
                     path.join(path.dirname(this.userChoices.prismaSchemaPath), 'generated/prisma-appsync/schema.gql'),
                 )
 
+                const yamlResolversPath = path.relative(
+                    path.join(this.detected.rootPath),
+                    path.join(path.dirname(this.userChoices.prismaSchemaPath), 'generated/prisma-appsync/resolvers.yaml'),
+                )
+
                 const devCmd = [
                     'npx prisma generate',
                     `DATABASE_URL='${databaseUrl}' npx prisma db push --accept-data-loss`,
-                    `DATABASE_URL='${databaseUrl}' npx vite-node ./server.ts --watch -- --schema ${gqlSchemaPath} --watchers '[{"watch":["**/*.prisma","*.prisma"],"exec":"npx prisma generate && DATABASE_URL='${databaseUrl}' npx prisma db push --accept-data-loss && touch ./server.ts"}]'`,
+                    `DATABASE_URL='${databaseUrl}' npx vite-node ./server.ts --watch -- --schema ${gqlSchemaPath} --resolvers ${yamlResolversPath} --watchers '[{"watch":["**/*.prisma","*.prisma"],"exec":"npx prisma generate && DATABASE_URL='${databaseUrl}' npx prisma db push --accept-data-loss && touch ./server.ts"}]'`,
                 ]
 
                 this.installConfig.scripts.push({
@@ -355,11 +368,16 @@ export class Installer {
                     path.join(path.dirname(this.userChoices.prismaSchemaPath), 'generated/prisma-appsync/schema.gql'),
                 )
 
+                const yamlResolversPath = path.relative(
+                    path.join(this.detected.rootPath),
+                    path.join(path.dirname(this.userChoices.prismaSchemaPath), 'generated/prisma-appsync/resolvers.yaml'),
+                )
+
                 const devCmd = [
                     'docker-compose up -d',
                     'npx prisma generate',
                     `DATABASE_URL='${databaseUrl}' npx prisma db push --accept-data-loss`,
-                    `DATABASE_URL='${databaseUrl}' npx vite-node ./server.ts --watch -- --schema ${gqlSchemaPath} --watchers '[{"watch":"../packages/(client|generator)/**","exec":"cd ../ && pnpm run build --ignoreServer && cd playground && npx prisma generate && touch ./server.ts"},{"watch":["**/*.prisma","*.prisma"],"exec":"npx prisma generate && DATABASE_URL='${databaseUrl}' npx prisma db push --accept-data-loss && touch ./server.ts"}]'`,
+                    `DATABASE_URL='${databaseUrl}' npx vite-node ./server.ts --watch -- --schema ${gqlSchemaPath} --resolvers ${yamlResolversPath} --watchers '[{"watch":"../packages/(client|generator)/**","exec":"cd ../ && pnpm run build --ignoreServer && cd playground && npx prisma generate && touch ./server.ts"},{"watch":["**/*.prisma","*.prisma"],"exec":"npx prisma generate && DATABASE_URL='${databaseUrl}' npx prisma db push --accept-data-loss && touch ./server.ts"}]'`,
                 ]
 
                 this.installConfig.scripts.push({
@@ -378,7 +396,7 @@ export class Installer {
         // package
         if (!this.fileExists(path.join(this.detected.rootPath, 'package.json'))) {
             this.installConfig.shells.push({
-                cmd: `${this.detected.packageManager} init -y`,
+                cmd: `${this.detected.packageManager === 'pnpm' ? 'pnpm init' : `${this.detected.packageManager} init -y`}`,
                 dir: this.detected.rootPath,
                 when: 'before',
             })

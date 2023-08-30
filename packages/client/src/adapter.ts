@@ -553,14 +553,17 @@ export function getPaths({
     context: Context
     prismaArgs: PrismaArgs
 }): string[] {
-    const paths: string[] = objectToPaths({
-        ...(prismaArgs?.data && {
-            data: prismaArgs.data,
+    const paths: string[] = [
+        operation,
+        ...objectToPaths({
+            ...(prismaArgs?.data && {
+                data: prismaArgs.data,
+            }),
+            ...(prismaArgs?.select && {
+                select: prismaArgs.select,
+            }),
         }),
-        ...(prismaArgs?.select && {
-            select: prismaArgs.select,
-        }),
-    })
+    ]
 
     paths.forEach((path: string, index: number) => {
         if (path.startsWith('data')) {
@@ -585,6 +588,6 @@ export function getPaths({
                 .split('/')
                 .filter(k => !Prisma_ReservedKeysForPaths.includes(k))
                 .join('/'),
-        ),
+        ).filter(Boolean),
     )
 }
