@@ -62,14 +62,14 @@ export default class SchemaBuilder {
             includeDirectives: true,
         })
 
-        return await this.perttyGraphQL(mergedSchema)
+        return await this.prettyGraphQL(mergedSchema)
     }
 
-    private async perttyGraphQL(schema: string) {
-        let perttyGraphQL = schema
+    private async prettyGraphQL(schema: string) {
+        let prettyGraphQL = schema
 
         try {
-            perttyGraphQL = await prettier.format(schema, {
+            prettyGraphQL = await prettier.format(schema, {
                 semi: false,
                 parser: 'graphql',
                 tabWidth: 4,
@@ -82,7 +82,7 @@ export default class SchemaBuilder {
             console.error(err)
         }
 
-        return perttyGraphQL
+        return prettyGraphQL
     }
 
     private parseModelDMMF(modelDMMF: DMMF.Model, options?: { defaultDirective?: string; schemaAuthzModes?: string[] }): ParsedModel {
@@ -1357,7 +1357,8 @@ export default class SchemaBuilder {
             this.buildSubscriptions(),
         ].join('\n\n')
 
-        return await this.perttyGraphQL(doc)
+
+        return await this.prettyGraphQL(doc)
     }
 
     private buildTypes() {
@@ -1388,9 +1389,15 @@ export default class SchemaBuilder {
             return [
                 `input ${i.name} {`,
                 i.fields.map((f) => {
-                    const defaultValue = ['boolean', 'string', 'number'].includes(typeof f.defaultValue)
-                        ? ` = ${f.defaultValue}`
-                        : ''
+                    const defaultValueType = typeof f.defaultValue
+                    let defaultValue = ''
+                    if (['boolean', 'string', 'number'].includes(defaultValueType)) {
+                        let value = f.defaultValue
+                        if (defaultValueType === 'string') {
+                            value = `"""${f.defaultValue.replace(/"""/g, '\\"""')}"""`
+                        }
+                        defaultValue = ` = ${value}`
+                    }
                     return `${f.name}: ${f.scalar}${defaultValue}`
                 }).join('\n'),
                 '}',
