@@ -1,0 +1,68 @@
+datasource db {
+  provider = "postgres"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-1.0.x"]
+}
+
+generator appsync {
+  provider     = "./dist/generator.js"
+  output       = "./generated/crud"
+  extendSchema = "./crud.gql"
+}
+
+model User {
+  uuid        String    @id @default(uuid()) @db.VarChar(200)
+  username    String    @unique
+  email       String    @unique
+  website     String?
+  hiddenField String?
+  role        Role?     @default(USER)
+  posts       Post[]
+  profile     Profile?
+  comments    Comment[]
+}
+
+model Profile {
+  uuid      String  @id @default(uuid()) @db.VarChar(200)
+  owner     User?   @relation(fields: [ownerUuid], references: [uuid])
+  ownerUuid String? @unique @db.VarChar(200)
+  bio       String?
+}
+
+model Post {
+  id          Int       @id @default(autoincrement())
+  title       String
+  author      User?     @relation(fields: [authorUuid], references: [uuid])
+  authorUuid  String?   @db.VarChar(200)
+  published   Boolean?  @default(false)
+  comments    Comment[]
+  views       Int?      @default(0)
+  lastSavedAt DateTime? @default(now())
+}
+
+model Comment {
+  id          Int       @id @default(autoincrement())
+  author      User?     @relation(fields: [authorUuid], references: [uuid])
+  authorUuid  String?   @db.VarChar(200)
+  post        Post      @relation(fields: [postId], references: [id])
+  postId      Int
+  message     String
+  lastSavedAt DateTime? @default(now())
+}
+
+model Like {
+  id         Int    @id @default(autoincrement())
+  authorUuid String @db.VarChar(200)
+  postId     Int
+
+  @@unique([authorUuid, postId])
+}
+
+enum Role {
+  USER
+  ADMIN
+}

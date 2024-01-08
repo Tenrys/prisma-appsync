@@ -11,7 +11,7 @@ import {
     lowerFirst,
     merge,
     replaceAll,
-    traverseNodes,
+    walk,
 } from './utils'
 
 export { PrismaAppSync } from './core'
@@ -22,7 +22,6 @@ export {
     QueryParamsCustom,
     BeforeHookParams,
     AfterHookParams,
-    Authorizations,
     Authorization,
     AppSyncEvent,
     Identity,
@@ -34,7 +33,8 @@ export {
     AppSyncResolverHandler,
     AppSyncResolverEvent,
     AppSyncIdentity,
-} from './defs'
+} from './types'
+export { Authorizations } from './consts'
 
 const _ = {
     merge,
@@ -48,7 +48,7 @@ const _ = {
     isUndefined,
     lowerFirst,
     isObject,
-    traverseNodes,
+    walk,
     replaceAll,
 }
 

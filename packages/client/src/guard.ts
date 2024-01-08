@@ -6,14 +6,15 @@ import type {
     Shield,
     ShieldAuthorization,
     ShieldRule,
-} from './defs'
-import { DebugTestingKey } from './defs'
-import { decode, encode, filterXSS, isEmpty, isMatchingGlob, merge, traverseNodes } from './utils'
+} from './types'
+import { DebugTestingKey } from './consts'
+import { decode, encode, filterXSS, isEmpty, isMatchingGlob, merge, walk } from './utils'
 import { CustomError } from './inspector'
 
 // https:// github.com/blackflux/lambda-rate-limiter
 const limiter = lambdaRateLimiter({
     interval: 60 * 1000, // 60 seconds = 1 minute
+    uniqueTokenPerInterval: 1000,
 })
 
 /**
@@ -23,12 +24,14 @@ const limiter = lambdaRateLimiter({
  * @returns any
  */
 export async function sanitize(data: any): Promise<any> {
-    return await traverseNodes(data, async (node) => {
-        if (typeof node?.key === 'string' && node?.key === DebugTestingKey)
-            node.break()
+    return await walk(data, async ({ key, value }, node) => {
+        if (typeof key === 'string' && key === DebugTestingKey)
+            node.ignoreChilds()
 
-        if (typeof node.value === 'string')
-            node.set(encode(filterXSS(node.value)))
+        if (typeof value === 'string')
+            value = encode(filterXSS(value))
+
+        return { key, value }
     })
 }
 
@@ -39,12 +42,14 @@ export async function sanitize(data: any): Promise<any> {
  * @returns any
  */
 export async function clarify(data: any): Promise<any> {
-    return await traverseNodes(data, async (node) => {
-        if (typeof node?.key === 'string' && node?.key === DebugTestingKey)
-            node.break()
+    return await walk(data, async ({ key, value }, node) => {
+        if (typeof key === 'string' && key === DebugTestingKey)
+            node.ignoreChilds()
 
-        if (typeof node.value === 'string')
-            node.set(decode(node.value))
+        if (typeof value === 'string')
+            value = decode(value)
+
+        return { key, value }
     })
 }
 

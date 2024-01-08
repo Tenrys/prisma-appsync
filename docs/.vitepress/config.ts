@@ -1,6 +1,4 @@
-import { defineConfig } from 'vitepress'
-
-export default defineConfig({
+export default {
     title: 'Prisma-AppSync',
     description: 'GraphQL API Generator for AWS and ◭ Prisma',
 
@@ -31,7 +29,17 @@ export default defineConfig({
 
         nav: [
             { text: 'Documentation', link: '/quick-start/getting-started' },
-            { text: 'Changelog', link: '/changelog/1.0.0-rc.7' },
+            { text: 'Changelog', link: '/changelog/1.0.0' },
+            { text: 'Support', link: '/support' },
+            {
+                text: 'Tools',
+                items: [
+                    {
+                        text: 'AppSync GraphQL Schema Diff',
+                        link: '/tools/appsync-gql-schema-diff',
+                    },
+                ],
+            },
             {
                 text: 'Links',
                 items: [
@@ -65,7 +73,7 @@ export default defineConfig({
                 text: 'Features',
                 collapsible: true,
                 items: [
-                    { text: 'Adding Hooks', link: '/features/hooks' },
+                    { text: 'Lifecycle hooks', link: '/features/hooks' },
                     { text: 'Custom resolvers', link: '/features/resolvers' },
                     { text: 'Tweaking GQL schema', link: '/features/gql-schema' },
                 ],
@@ -74,7 +82,7 @@ export default defineConfig({
                 text: 'Security',
                 collapsible: true,
                 items: [
-                    { text: 'AppSync Authz', link: '/security/appsync-authz' },
+                    { text: 'Authorization', link: '/security/appsync-authz' },
                     { text: 'Shield (ACL rules)', link: '/security/shield-acl' },
                     { text: 'XSS sanitizer', link: '/security/xss-sanitizer' },
                     { text: 'Query depth', link: '/security/query-depth' },
@@ -93,10 +101,10 @@ export default defineConfig({
                 collapsible: true,
                 collapsed: true,
                 items: [
-                    { text: '(latest) 1.0.0-rc.7', link: '/changelog/1.0.0-rc.7' },
+                    { text: '(latest) v1.0.0', link: '/changelog/1.0.0' },
                     { text: 'Previous', link: '/changelog/' },
                 ],
             },
         ],
     },
-})
+}

@@ -1,3 +1,4 @@
+/* eslint-disable n/prefer-global/process */
 /* eslint-disable no-console */
 import { cli as cleye } from 'cleye'
 import { type ServerOptions, useAppSyncSimulator } from './appsync-simulator'
@@ -56,8 +57,8 @@ export async function createServer(serverOptions: ServerOptions): Promise<void> 
 
     await simulator.start()
 
-    console.log(`🧩 GraphQL server at http://localhost:${serverOptions.port}/graphql`)
-    console.log(`🚀 Prisma-AppSync GraphiQL at http://localhost:${serverOptions.port}`)
+    console.log(`\n🧩 GraphQL IDE: http://localhost:${serverOptions.port}`)
+    console.log(`🔌 API endpoint: http://localhost:${serverOptions.port}/graphql`)
 }
 
 export * from './appsync-simulator'

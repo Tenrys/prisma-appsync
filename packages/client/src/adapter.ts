@@ -3,12 +3,13 @@ import { sanitize } from './guard'
 import {
     clone,
     isEmpty,
+    isObject,
     isUndefined,
     lowerFirst,
     merge,
     objectToPaths,
-    traverseNodes,
-    unique,
+    uniq,
+    walk,
 } from './utils'
 import type {
     Action,
@@ -22,14 +23,14 @@ import type {
     Options,
     PrismaArgs,
     QueryParams,
-} from './defs'
+} from './types'
 import {
     Actions,
     ActionsAliasesList,
     Authorizations,
     BatchActionsList,
     Prisma_ReservedKeysForPaths,
-} from './defs'
+} from './consts'
 
 /**
  * #### Parse AppSync direct resolver `event` and returns Query Params.
@@ -105,22 +106,23 @@ export async function parseEvent(appsyncEvent: AppSyncEvent, options: Options, c
  * @returns any
  */
 export async function addNullables(data: any): Promise<any> {
-    return await traverseNodes(data, async (node) => {
-        if (typeof node?.key === 'string' && (node?.key === 'is' || node?.key === 'isNot')) {
-            node.set(node?.value === 'NULL' ? null : undefined)
-            node.break()
-        }
+    return await walk(data, async ({ key, value }, node) => {
+        if (key === 'is' || key === 'isNot') {
+            value = value === 'NULL' ? null : undefined
 
-        else if (typeof node?.key === 'string' && node?.childKeys?.includes('isNull')) {
-            const { isNull, ...value } = node.value
+            node.ignoreChilds()
+        }
+        else if (value && isObject(value) && Object.keys(value).includes('isNull')) {
+            const { isNull, ...val } = value as any
 
             if (isNull === true)
-                node.set({ ...value, equals: null })
+                value = { ...val, equals: null }
             else
-                node.set({ ...value, not: null })
+                value = { ...val, not: null }
 
-            node.break()
+            node.ignoreChilds()
         }
+        return { key, value }
     })
 }
 
@@ -178,7 +180,6 @@ export function getAuthIdentity({ appsyncEvent }: { appsyncEvent: AppSyncEvent }
         && typeof (appsyncEvent.identity as any).username !== 'undefined'
         && typeof (appsyncEvent.identity as any).claims !== 'undefined'
         && typeof (appsyncEvent.identity as any).sourceIp !== 'undefined'
-        && typeof (appsyncEvent.identity as any).defaultAuthStrategy !== 'undefined'
     ) {
         authorization = Authorizations.AMAZON_COGNITO_USER_POOLS
         identity = appsyncEvent.identity
@@ -327,7 +328,7 @@ export function getModel(
     const model = options?.modelsMapping?.[actionModel]
 
     if (!model) {
-        throw new CustomError('Issue parsing auto-injected models mapping config.', {
+        throw new CustomError(`Resolver "${actionModel}" not found. If it's a custom resolver, please ensure it's available within your Lambda function.`, {
             type: 'INTERNAL_SERVER_ERROR',
         })
     }
@@ -423,12 +424,12 @@ export function getPrismaArgs({
         delete prismaArgs.select
 
     if (!isNone(_arguments.skip))
-        prismaArgs.skip = parseInt(_arguments.skip)
+        prismaArgs.skip = Number.parseInt(_arguments.skip)
     else if (defaultPagination !== false && action === Actions.list)
         prismaArgs.skip = 0
 
     if (!isNone(_arguments.take))
-        prismaArgs.take = parseInt(_arguments.take)
+        prismaArgs.take = Number.parseInt(_arguments.take)
     else if (defaultPagination !== false && action === Actions.list)
         prismaArgs.take = defaultPagination
 
@@ -460,6 +461,7 @@ function getOrderBy(sortObj: any): any {
 function parseOrderBy(orderByInputs: any): any[] {
     const orderByOutput: any = []
     const orderByInputsArray = Array.isArray(orderByInputs) ? orderByInputs : [orderByInputs]
+
     orderByInputsArray.forEach((orderByInput: any) => {
         orderByOutput.push(getOrderBy(orderByInput))
     })
@@ -582,7 +584,7 @@ export function getPaths({
         }
     })
 
-    return unique(
+    return uniq(
         paths.map(
             (path: string) => path
                 .split('/')

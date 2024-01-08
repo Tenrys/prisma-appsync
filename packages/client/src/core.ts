@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/ban-types */
+/* eslint-disable no-restricted-globals */
+/* eslint-disable n/prefer-global/process */
 import type {
     AfterHookParams,
     InjectedConfig,
@@ -6,13 +9,15 @@ import type {
     ResolveParams,
     Shield,
     ShieldAuthorization,
-} from './defs'
+} from './types'
+import {
+    Prisma,
+    PrismaClient,
+} from './types'
 import {
     BatchActionsList,
     DebugTestingKey,
-    Prisma,
-    PrismaClient,
-} from './defs'
+} from './consts'
 import { CustomError, log, parseError } from './inspector'
 import {
     clarify,
@@ -77,7 +82,7 @@ export class PrismaAppSync {
    *   sanitize: true,
    *   logLevel: 'INFO',
    *   defaultPagination: 50,
-   *   maxDepth: 3,
+   *   maxDepth: 4,
    *   maxReqPerUserMinute: 200
    * }
    * ```
@@ -110,7 +115,7 @@ export class PrismaAppSync {
             maxDepth:
                 typeof options?.maxDepth !== 'undefined'
                     ? options.maxDepth
-                    : 3,
+                    : 4,
             maxReqPerUserMinute:
                 typeof options?.maxReqPerUserMinute !== 'undefined'
                     ? options.maxReqPerUserMinute
@@ -161,28 +166,17 @@ export class PrismaAppSync {
         process.env.PRISMA_APPSYNC_UNSECURE_GRAPHQL_ERRORS = this.options.unsecureGraphQLErrors.toString()
 
         // Debug logs
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
+        // eslint-disable-next-line unused-imports/no-unused-vars
         const { fieldsMapping, ...newInstanceLogs } = this.options
         log('New Prisma-AppSync instance created:', newInstanceLogs)
 
         // Prisma client options
         const prismaLogDef: Prisma.LogDefinition[] = [
-            {
-                emit: 'event',
-                level: 'query',
-            },
-            {
-                emit: 'event',
-                level: 'error',
-            },
-            {
-                emit: 'event',
-                level: 'info',
-            },
-            {
-                emit: 'event',
-                level: 'warn',
-            },
+            { emit: 'event', level: 'query' },
+            { emit: 'event', level: 'error' },
+            { emit: 'event', level: 'info' },
+            { emit: 'event', level: 'warn' },
         ]
 
         // Create new Prisma Client
