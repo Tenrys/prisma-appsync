@@ -860,7 +860,7 @@ export default class SchemaBuilder {
                             return {
                                 name: field.name,
                                 scalar: model.getScalar(field),
-                                defaultValue: field.default,
+                                default: { value: field.default, kind: field.kind },
                             }
                         }
                     }) || [],
@@ -889,7 +889,7 @@ export default class SchemaBuilder {
                                     return {
                                         name: field.name,
                                         scalar: model.getScalar(field),
-                                        defaultValue: field.default,
+                                        default: { value: field.default, kind: field.kind },
                                     }
                                 }
                             }) || [],
@@ -919,7 +919,7 @@ export default class SchemaBuilder {
                     ?.map(field => ({
                         name: field.name,
                         scalar: model.getScalar(field),
-                        defaultValue: field.default,
+                        default: { value: field.default, kind: field.kind },
                     })) || [],
             })
         }
@@ -1389,14 +1389,13 @@ export default class SchemaBuilder {
             return [
                 `input ${i.name} {`,
                 i.fields.map((f) => {
-                    const defaultValueType = typeof f.defaultValue
-                    let defaultValue = ''
-                    if (['boolean', 'string', 'number'].includes(defaultValueType)) {
-                        let value = f.defaultValue
-                        if (defaultValueType === 'string') {
-                            value = `"""${f.defaultValue.replace(/"""/g, '\\"""')}"""`
-                        }
-                        defaultValue = ` = ${value}`
+                    let defaultValue = ``
+                    if (f?.default && ['boolean', 'number'].includes(typeof f.default.value)) {
+                        defaultValue = ` = ${f.default?.value}`
+                    } else if (f?.default && ['string'].includes(typeof f.default.value)) {
+                        defaultValue = f.default.kind === 'enum'
+                            ? ` = ${String(f.default?.value)}`
+                            : ` = "${String(f.default?.value).replace(/"/g, "\\\"")}"`
                     }
                     return `${f.name}: ${f.scalar}${defaultValue}`
                 }).join('\n'),
@@ -1467,7 +1466,10 @@ type ParsedModel = {
 type GqlField = {
     name: string
     scalar: string
-    defaultValue?: any
+    default?: {
+        value: any
+        kind: DMMF.Field['kind']
+    }
     directives?: string[]
 }
 
